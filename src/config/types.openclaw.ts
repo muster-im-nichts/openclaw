@@ -97,6 +97,13 @@ export type OpenClawConfig = {
   talk?: TalkConfig;
   gateway?: GatewayConfig;
   memory?: MemoryConfig;
+  workingContext?: {
+    enabled?: boolean;
+    maxEntries?: number;
+    defaultTtlMinutes?: number;
+    maxInjectedTokens?: number;
+    autoCapture?: boolean;
+  };
 };
 
 export type ConfigValidationIssue = {

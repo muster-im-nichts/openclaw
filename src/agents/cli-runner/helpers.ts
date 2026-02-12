@@ -15,6 +15,7 @@ import { resolveDefaultModelForAgent } from "../model-selection.js";
 import { detectRuntimeShell } from "../shell-utils.js";
 import { buildSystemPromptParams } from "../system-prompt-params.js";
 import { buildAgentSystemPrompt } from "../system-prompt.js";
+import { getWorkingContextManager, resolveWorkingContextConfig, formatForSystemPrompt } from "../working-context/index.js";
 
 const CLI_RUN_QUEUE = new Map<string, Promise<unknown>>();
 
@@ -245,6 +246,22 @@ export function buildSystemPrompt(params: {
     contextFiles: params.contextFiles,
     ttsHint,
     memoryCitationsMode: params.config?.memory?.citations,
+    workingContextPrompt: (() => {
+      try {
+        const wcConfig = resolveWorkingContextConfig(params.config);
+        if (!wcConfig.enabled) return undefined;
+        const manager = getWorkingContextManager(params.config);
+        if (!manager) return undefined;
+        const entries = manager.getRecent({
+          maxTokens: wcConfig.maxInjectedTokens,
+          maxAge: wcConfig.defaultTtlMinutes,
+        });
+        if (entries.length === 0) return undefined;
+        return formatForSystemPrompt(entries, { maxTokens: wcConfig.maxInjectedTokens });
+      } catch {
+        return undefined;
+      }
+    })(),
   });
 }
 

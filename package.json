@@ -110,6 +110,7 @@
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "0.14.1",
+    "better-sqlite3": "^12.6.2",
     "@aws-sdk/client-bedrock": "^3.988.0",
     "@buape/carbon": "0.14.0",
     "@clack/prompts": "^1.0.0",
@@ -162,6 +163,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
     "@grammyjs/types": "^3.24.0",
     "@lit-labs/signals": "^0.2.0",
     "@lit/context": "^1.1.6",

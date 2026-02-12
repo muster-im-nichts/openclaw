@@ -28,6 +28,7 @@ import {
   resolveChannelMessageToolHints,
 } from "../../channel-tools.js";
 import { resolveOpenClawDocsPath } from "../../docs-path.js";
+import { getWorkingContextManager, resolveWorkingContextConfig, formatForSystemPrompt } from "../../working-context/index.js";
 import { isTimeoutError } from "../../failover-error.js";
 import { resolveModelAuthMode } from "../../model-auth.js";
 import { resolveDefaultModelForAgent } from "../../model-selection.js";
@@ -376,6 +377,22 @@ export async function runEmbeddedAttempt(
       userTimeFormat,
       contextFiles,
       memoryCitationsMode: params.config?.memory?.citations,
+      workingContextPrompt: (() => {
+        try {
+          const wcConfig = resolveWorkingContextConfig(params.config);
+          if (!wcConfig.enabled) return undefined;
+          const manager = getWorkingContextManager(params.config);
+          if (!manager) return undefined;
+          const entries = manager.getRecent({
+            maxTokens: wcConfig.maxInjectedTokens,
+            maxAge: wcConfig.defaultTtlMinutes,
+          });
+          if (entries.length === 0) return undefined;
+          return formatForSystemPrompt(entries, { maxTokens: wcConfig.maxInjectedTokens });
+        } catch {
+          return undefined;
+        }
+      })(),
     });
     const systemPromptReport = buildSystemPromptReport({
       source: "run",

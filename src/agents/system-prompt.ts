@@ -215,6 +215,8 @@ export function buildAgentSystemPrompt(params: {
     channel: string;
   };
   memoryCitationsMode?: MemoryCitationsMode;
+  /** Pre-formatted working context string to inject after Project Context. */
+  workingContextPrompt?: string;
 }) {
   const coreToolSummaries: Record<string, string> = {
     read: "Read file contents",
@@ -569,6 +571,11 @@ export function buildAgentSystemPrompt(params: {
     for (const file of validContextFiles) {
       lines.push(`## ${file.path}`, "", file.content, "");
     }
+  }
+
+  // Working context: recent cross-session activity
+  if (params.workingContextPrompt) {
+    lines.push(params.workingContextPrompt, "");
   }
 
   // Skip silent replies for subagent/none modes

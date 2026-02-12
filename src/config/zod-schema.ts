@@ -515,6 +515,16 @@ export const OpenClawSchema = z
       .strict()
       .optional(),
     memory: MemorySchema,
+    workingContext: z
+      .object({
+        enabled: z.boolean().optional(),
+        maxEntries: z.number().int().positive().optional(),
+        defaultTtlMinutes: z.number().int().nonnegative().optional(),
+        maxInjectedTokens: z.number().int().positive().optional(),
+        autoCapture: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
     skills: z
       .object({
         allowBundled: z.array(z.string()).optional(),

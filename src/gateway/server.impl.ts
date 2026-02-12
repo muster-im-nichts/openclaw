@@ -47,6 +47,8 @@ import { ExecApprovalManager } from "./exec-approval-manager.js";
 import { NodeRegistry } from "./node-registry.js";
 import { createChannelManager } from "./server-channels.js";
 import { createAgentEventHandler } from "./server-chat.js";
+import { createWorkingContextCaptureHandler } from "../agents/working-context/capture.js";
+import { closeWorkingContextManager } from "../agents/working-context/singleton.js";
 import { createGatewayCloseHandler } from "./server-close.js";
 import { buildGatewayCronService } from "./server-cron.js";
 import { startGatewayDiscovery } from "./server-discovery-runtime.js";
@@ -453,6 +455,9 @@ export async function startGatewayServer(
     }),
   );
 
+  // Working context: capture agent turn summaries for cross-session continuity
+  const workingContextUnsub = onAgentEvent(createWorkingContextCaptureHandler());
+
   const heartbeatUnsub = onHeartbeatEvent((evt) => {
     broadcast("heartbeat", evt, { dropIfSlow: true });
   });
@@ -632,6 +637,8 @@ export async function startGatewayServer(
         skillsRefreshTimer = null;
       }
       skillsChangeUnsub();
+      workingContextUnsub();
+      closeWorkingContextManager();
       await close(opts);
     },
   };
